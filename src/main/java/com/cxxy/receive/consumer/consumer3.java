@@ -11,11 +11,11 @@ import org.springframework.stereotype.Component;
  * Date: 5:23 PM 2018/11/9
  */
 @Component
-public class consumer1 {
+public class consumer3 {
 
-    @JmsListener(destination = topics.COMMON_TEST_TOPIC)
+    @JmsListener(destination = topics.COMMON_TEST_OUT_TOPIC, subscription = "commonTestOutTopic", containerFactory = "topicJmsContainerFactory")
     public void receiveMessage(String text) {
 
-        System.out.println(DateUtil.getCurrentDateString("yyyy-MM-dd HH:mm:ss") + ",consumer1 收到queue消息:" + text);
+        System.out.println(DateUtil.getCurrentDateString("yyyy-MM-dd HH:mm:ss") + ",consumer3 收到topic消息:" + text);
     }
 }

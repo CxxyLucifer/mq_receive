@@ -1,6 +1,7 @@
 package com.cxxy.receive.config;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.jms.DefaultJmsListenerContainerFactoryConfigurer;
 import org.springframework.boot.autoconfigure.jms.activemq.ActiveMQProperties;
@@ -20,7 +21,6 @@ import javax.jms.ConnectionFactory;
  * Date: 4:39 PM 2018/11/9
  */
 @Configuration
-@EnableJms
 @EnableConfigurationProperties(ActiveMQProperties.class)
 public class MQListenerConfiguration {
 
@@ -31,6 +31,7 @@ public class MQListenerConfiguration {
     public ConnectionFactory consumerConnectionFactory(ActiveMQProperties properties){
         ActiveMQConnectionFactory activeMQConnectionFactory = new ActiveMQConnectionFactory(properties.getBrokerUrl());
         activeMQConnectionFactory.setUseAsyncSend(true);
+//        activeMQConnectionFactory.setClientID("receive-listener" + RandomStringUtils.randomAlphabetic(4));
         activeMQConnectionFactory.setClientID("receive-listener");
 
         CachingConnectionFactory cachingConnectionFactory = new CachingConnectionFactory(activeMQConnectionFactory);
@@ -39,21 +40,21 @@ public class MQListenerConfiguration {
     }
 
 
-//    /**
-//     * 持久化订阅时，需要为每一个JMSListener配置一个ListenerContainer
-//     * 需设置subscriptionDurable为true
-//     */
-//    private DefaultJmsListenerContainerFactory createContainerFactory(DefaultJmsListenerContainerFactoryConfigurer configurer,
-//                                                                      ConnectionFactory connectionFactory) {
-//        DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
-//        configurer.configure(factory, connectionFactory);
-//        factory.setSubscriptionDurable(true);
-//        return factory;
-//    }
-//
-//    @Bean
-//    public JmsListenerContainerFactory<?> consumer1JmsContainerFactory(DefaultJmsListenerContainerFactoryConfigurer configurer,
-//                                                                      @Qualifier("consumerConnectionFactory") ConnectionFactory consumerConnectionFactory) {
-//        return createContainerFactory(configurer, consumerConnectionFactory);
-//    }
+    /**
+     * 持久化订阅时，需要为每一个JMSListener配置一个ListenerContainer
+     * 需设置subscriptionDurable为true
+     */
+    private DefaultJmsListenerContainerFactory createContainerFactory(DefaultJmsListenerContainerFactoryConfigurer configurer,
+                                                                      ConnectionFactory connectionFactory) {
+        DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
+        configurer.configure(factory, connectionFactory);
+        factory.setSubscriptionDurable(true);
+        return factory;
+    }
+
+    @Bean
+    public JmsListenerContainerFactory<?> topicJmsContainerFactory(DefaultJmsListenerContainerFactoryConfigurer configurer,
+                                                                      @Qualifier("consumerConnectionFactory") ConnectionFactory consumerConnectionFactory) {
+        return createContainerFactory(configurer, consumerConnectionFactory);
+    }
 }
